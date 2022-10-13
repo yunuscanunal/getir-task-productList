@@ -1,58 +1,70 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
+import React, { Component } from 'react';
 import './App.css';
+import Products from "./components/Products";
+import Filter from "./components/Filter";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { products: [], filteredProducts: [], };
+    this.handleChangeSort = this.handleChangeSort.bind(this);
+    this.handlePro = this.handlePro.bind(this);
+  }
+
+
+
+  componentWillMount() {
+    fetch("http://localhost:8000/products").then(res => res.json()).then(data => this.setState({
+      products: data,
+      filteredProducts: data
+    }));
+  }
+  handleChangeSort(e) {
+    this.setState({ sort: e.target.value });
+    this.listProducts();
+  }
+  handlePro(e) {
+    this.setState({ pro: e.target.value });
+    this.listProducts();
+  }
+  listProducts() {
+    this.setState(state => {
+      if (state.sort === "Lowest") {
+        state.products.sort((a, b) => (state.sort === "Lowest") ? (a.price > b.price ? 1 : -1) : a.price < b.price ? 1 : -1)
+      } else if (state.sort === "Highest") {
+        state.products.sort((a, b) => (a.added < b.added ? 1 : -1));
+
+      } else if (state.sort === "Old") {
+        state.products.sort((a, b) => (state.sort === "Old") ? (a.added > b.added ? 1 : -1) : a.added < b.added ? 1 : -1)
+      } else if (state.sort === "New") {
+        state.products.sort((a, b) => (a.added < b.added ? 1 : -1));
+      } if (state.pro === "Shirt") {
+        state.products.pro((a, b) => (state.pro === "Shirt") ? (a.manufacturer === "Shirt" & b.manufacturer === "Shirt") : (a.manufacturer === "Mug" & b.manufacturer === "Mug"))
+      }
+      return { filteredProducts: state.products };
+    })
+  }
+  render() {
+    return (
+      <div className="container">
+        <h1>Market</h1>
+        <hr />
+        <div className='row'>
+          <div className='col-md-8'>
+            <Filter brand={this.state.brand} pro={this.state.pro} sort={this.state.sort} handleBrand={this.handleBrand} handlePro={this.handlePro} handleChangeSort={this.handleChangeSort} count={this.state.filteredProducts.length} />
+            <hr />
+            <Products products={this.state.filteredProducts} handleAddToCart={this.handleAddToCart} />
+          </div>
+
+          <div className='col-md-4'>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
+
 
 export default App;
